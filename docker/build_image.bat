@@ -1,0 +1,1 @@
+docker build -t game_poll_bot .

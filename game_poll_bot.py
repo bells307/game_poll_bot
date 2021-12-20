@@ -73,15 +73,16 @@ class GamePollBot:
         self.updater = Updater(self.config['token'])
 
         dispatcher = self.updater.dispatcher
-        dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.help_cmd))
+        dispatcher.add_handler(MessageHandler(
+            Filters.text & ~Filters.command, self.help_cmd))
         dispatcher.add_handler(CommandHandler('help', self.help_cmd))
         dispatcher.add_handler(CommandHandler('start', self.help_cmd))
-        dispatcher.add_handler(CommandHandler('poll', self.poll_cmd, pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler(
+            'poll', self.poll_cmd, pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('add', self.add_cmd))
         dispatcher.add_handler(CommandHandler('del', self.del_cmd))
         dispatcher.add_handler(CommandHandler('list', self.list_cmd))
-        dispatcher.add_handler(CommandHandler(
-            'daily_job', self.daily_job_cmd))
+        dispatcher.add_handler(CommandHandler('daily', self.daily_cmd))
         dispatcher.add_handler(ChatMemberHandler(
             self.chat_member_handler, ChatMemberHandler.MY_CHAT_MEMBER))
         dispatcher.add_handler(MessageHandler(Filters.command, self.help_cmd))
@@ -99,7 +100,7 @@ class GamePollBot:
             '/add <вариант> - добавить вариант в опрос\n'
             '/del <вариант> - удалить вариант опроса\n'
             '/list - получить список вариантов опроса\n'
-            '/daily_job - создать ежедневную задачу на запуск голосования\n'
+            '/daily - создать ежедневную задачу на запуск голосования\n'
         )
 
     def chat_member_handler(self, update: Update, context: CallbackContext):
@@ -136,12 +137,12 @@ class GamePollBot:
             )
 
     # Создать задачу для бота на запуск голосования в определенные дни
-    def daily_job_cmd(self, update: Update, context: CallbackContext):
-        for job in context.job_queue.get_jobs_by_name('daily_job'):
+    def daily_cmd(self, update: Update, context: CallbackContext):
+        for job in context.job_queue.get_jobs_by_name('daily'):
             job.schedule_removal()
 
-        context.job_queue.run_daily(self.send_poll, datetime.time(hour=12, minute=00, tzinfo=pytz.timezone(
-            'Europe/Moscow')), days=(0, 1, 2, 3, 4), name='daily_job')
+        context.job_queue.run_daily(self.send_poll, datetime.time(hour=12, minute=30, tzinfo=pytz.timezone(
+            'Europe/Moscow')), days=(0, 1, 2, 3, 4), name='daily')
 
         update.message.reply_text(
             'Создана ежедневная задача на запуск голосования')
